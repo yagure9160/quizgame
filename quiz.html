@@ -1,0 +1,302 @@
+<!doctype html>
+<html class="no-js" lang="">
+
+<head>
+  <meta charset="utf-8">
+  <link rel="stylesheet" href="quiz.css" />
+  <title>プロ野球クイズ</title>
+  <meta name="description" content="">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  <meta property="og:title" content="">
+  <meta property="og:type" content="">
+  <meta property="og:url" content="">
+  <meta property="og:image" content="">
+
+  <link rel="manifest" href="site.webmanifest">
+  <link rel="apple-touch-icon" href="icon.png">
+  <!-- Place favicon.ico in the root directory -->
+
+<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+
+  <meta name="theme-color" content="#fafafa">
+    <script src='https://ajax.googleapis.com/ajax/libs/jquery/1.12.4/jquery.min.js?ver=1.12.4'>
+</script>
+
+<script type="text/javascript" src="app.js"></script>
+
+<script>
+
+jQuery(function($){
+	var url_tw = location.href;
+	var title_tw = $('title').html();
+
+	var text_tw = encodeURIComponent(title_tw);
+	var tweet_url = 'https://twitter.com/share?url=' + url_tw + '&text=' + text_tw;
+	$('a.share_tw').attr("href", tweet_url);
+
+});
+$(function(){
+    var quizArea = $('.quiz_area'); //クイズを管理するDOMを指定
+    var quiz_html = quizArea.html(); //もう一度　を押した時に元に戻すため初期HTMLを変数で保管
+    
+    var quiz_cnt = 0; //現在の問題数を管理
+    var quiz_fin_cnt = 10; //何問で終了か設定（クイズ数以下であること）
+    var quiz_success_cnt = 0; //問題の正解数
+        
+    //クイズの配列を設定
+    //answerの選択肢の数はいくつでもOK　ただし先頭を正解とすること(出題時に選択肢はシャッフルされる)
+    
+    var aryQuiz = [];
+    aryQuiz.push(
+        {
+            question : '打者が満塁ホームランを打った場合、最大で何得点入るか？',
+            answer : ['4点','2点','3点','1点']
+        }
+        ,{
+            question : 'マウンドからホームベースまでの距離は何メートルでしょう？',
+            answer : ['18.44メートル','17.44メートル','19.44メートル','20.44メートル']
+        }
+        ,{
+            question : '次のうちプロ野球のグローブ規定でピッチャー用グローブで禁止している色はなんでしょう？',
+            answer : ['灰色','緑色','赤色','紫色']
+        }
+        ,{
+            question : '遊撃手とはどこのポジションのことを指すのでしょう？',
+            answer : ['ショート', 'センター', 'キャッチャー', 'ファースト']
+        }
+        ,{
+            question : '次のうちNPBで一番背ネームが長い選手は誰でしょう？',
+            answer : ['下敷領悠太', '中野渡進', '小笠原道大', '松木平優太']
+        }
+        ,{
+            question : '次のうち大阪府出身じゃないのは誰でしょう？',
+            answer : ['内海哲也', '九鬼隆平', '山口航輝', '愛斗']
+        }
+        ,{
+            question : '次のうち元中日の森野がつけたことのない背番号はどれでしょう？',
+            answer : ['57', '8', '16', '75']
+        }
+        ,{
+            question : '2011年に元中日の浅尾拓也が叩き出した防御率はなんでしょう？',
+            answer : ['0.41', '0.42', '0.43', '0.44']
+        }
+        ,{
+            question : '次のうち社会人経由でプロ入りした人は誰？',
+            answer : ['杉内俊哉', '新垣渚', '赤田将吾', '松坂大輔']
+        }
+        ,{
+            question : '次のうち広島に在籍したことのない人は誰でしょう？',
+            answer : ['笘篠誠治', '野々垣武志', '久本祐一', '笘篠賢治']
+        }
+        ,{
+            question : '一般の野球ルールでは、塁間距離はいくつでしょう？',
+            answer : ['27.431メートル', '26.431メートル', '28.431メートル', '29.431メートル']
+        }
+         ,{
+            question : '次のうち日本生命出身じゃないのは誰でしょう？',
+            answer : ['石川歩', '大島洋平', '福留孝介', '井上晴哉']
+        }
+        ,{
+            question : '2005年最多奪三振投手のタイトルを獲得したのは誰でしょう？',
+            answer : ['門倉健', '三浦大輔', '川上憲伸', '黒田博樹']
+        }
+         ,{
+            question : '次のうちフォースプレーとなる場面はなんでしょう？（アウトカウントは0アウトもしくは1アウトとする）',
+            answer : ['ランナーが一塁、二塁', 'ランナーが二塁', 'ランナーが二塁、三塁', 'ランナーが三塁']
+        }
+          ,{
+            question : 'プロ野球で通算10万号ホームランを打った選手は誰でしょう？',
+            answer : ['マレーロ', 'T-岡田', '坂本勇人', '新井貴浩']
+        }
+          ,{
+            question : '次のうち歴代助っ人外国人で最多試合出場選手は誰でしょう？',
+            answer : ['ラミレス', 'ローズ', 'バルボン', 'リー']
+        }
+        ,{
+            question : 'プロ野球黎明期の大投手の一人スタルヒンが最後に在籍した球団はどこでしょう？',
+            answer : ['トンボユニオンズ', '大映スターズ', '読売ジャイアンツ', '太陽ロビンス']
+        }
+        ,{
+            question : '次のうち宮崎敏郎の愛称はどれでしょう？',
+            answer : ['ハマのプーさん', 'ハマの番長', 'ハマのミッキー', 'ハマの元気印']
+        }
+        ,{
+            question : '第1回WBC大会で捕手で選ばれたのは里崎智也と谷繁元信と誰でしょう？',
+            answer : ['相川亮二', '城島健司', '阿部慎之助', '石原慶幸']
+        }
+        ,{
+            question : 'プロ野球史上初打席初球ホームランを打った人数は何人でしょう？',
+            answer : ['10', '9', '8', '11']
+        }
+        ,{
+            question : 'バントの構えからヒッティングに切り替えて打つ打法を何と言うでしょう？',
+            answer : ['バスター', 'スクイズ', 'エンドラン', 'スチール']
+        }
+        ,{
+            question : '1965年度のドラフト会議で18位まで指名した球団はどれでしょう？',
+            answer : ['広島カープ', '中日ドラゴンズ', 'サンケイスワローズ', '西鉄ライオンズ']
+        }
+        ,{
+            question : '次のうちヤクルトの村上宗隆が56号ホームラン打った時の投手は誰でしょう？',
+            answer : ['入江大生', 'エスコバー', '三上朋也', '東克樹']
+        }
+        ,{
+            question : 'ビッグバン打線とはどこの球団の打線の愛称でしょう？',
+            answer : ['日本ハム', '西武', 'オリックス', 'ロッテ']
+        }
+        ,{
+            question : '巨人初代４番打者は誰でしょう？',
+            answer : ['永沢富士雄', '伊藤健太郎', '中島治康', '筒井修']
+        }
+        ,{
+            question : '次のうち2020年途中に巨人に移籍したウィーラーの交換相手は誰でしょう？',
+            answer : ['池田駿', '髙田萌生', '澤村拓一', '田中貴也']
+        }
+        ,{
+            question : '元阪急福本豊が記録した通算盗塁記録はいくつでしょう？',
+            answer : ['1065', '1034', '1001', '1040']
+        }
+        ,{
+            question : '中日のマスコットであるドアラの年俸といえば何でしょう？',
+            answer : ['食パン', '現金', 'ヤクルト', 'ユーカリ']
+        }
+        ,{
+            question : '阪神の永久欠番といえば10番と11番と何でしょう？',
+            answer : ['23', '22', '1', '14']
+        }
+      ,{
+            question : '次のうちNPBのコーチ経験がないのは誰でしょう？',
+            answer : ['田中大輔', '前田章宏', '武山真吾', '小川将俊']
+        }
+
+    );
+    
+    quizReset();
+    
+    quizArea.on('click', '.quiz_ans_area ul li', function(){
+        //画面を暗くするボックスを表示（上から重ねて、結果表示中は選択肢のクリックやタップを封じる
+        quizArea.find('.quiz_area_bg').show();
+        //選択した回答に色を付ける
+        $(this).addClass('selected');
+        if($(this).data('true')){
+            //正解の処理 〇を表示
+            quizArea.find('.quiz_area_icon').addClass('true');
+            //正解数をカウント
+            quiz_success_cnt++;
+        }else{
+            //不正解の処理
+            quizArea.find('.quiz_area_icon').addClass('false');
+        }
+        setTimeout(function(){
+            //表示を元に戻す
+            quizArea.find('.quiz_ans_area ul li').removeClass('selected');
+            quizArea.find('.quiz_area_icon').removeClass('true false');
+            quizArea.find('.quiz_area_bg').hide();
+            //問題のカウントを進める
+            quiz_cnt++;
+            if(quiz_fin_cnt > quiz_cnt){
+                //次の問題を設定する
+                quizShow();
+            }else{
+                //結果表示画面を表示
+                quizResult();
+            }
+        }, 2000);
+    });
+    
+    //もう一度挑戦するを押した時の処理
+    quizArea.on('click', '.quiz_restart', function(){
+        quizReset();
+    });
+    
+    //リセットを行う関数
+    function quizReset(){
+        quizArea.html(quiz_html); //表示を元に戻す
+        quiz_cnt = 0;
+        quiz_success_cnt = 0;
+        aryQuiz = arrShuffle(aryQuiz); //毎回出題の順番をシャッフルしたい場合はここのコメントを消してね
+        quizShow();
+    }
+    
+    //問題を表示する関数
+    function quizShow(){
+        quizArea.find('.twitter').hide();
+        quizArea.find('.wordpress').hide();
+
+        //何問目かを表示
+        quizArea.find('.quiz_no').text((quiz_cnt + 1));
+        //問題文を表示
+        quizArea.find('.quiz_question').text(aryQuiz[quiz_cnt]['question']);
+        //正解の回答を取得する
+        var success = aryQuiz[quiz_cnt]['answer'][0];
+        //現在の選択肢表示を削除する
+        quizArea.find('.quiz_ans_area ul').empty();
+        //問題文の選択肢をシャッフルさせる(自作関数) .concat()は参照渡し対策
+        var aryHoge = arrShuffle(aryQuiz[quiz_cnt]['answer'].concat());
+        //問題文の配列を繰り返し表示する
+        $.each(aryHoge, function(key, value){
+            var fuga = '<li>' + value + '</li>';
+            //正解の場合はdata属性を付与する
+            if(success === value){
+                fuga = '<li data-true="1">' + value + '</li>';
+            }
+            quizArea.find('.quiz_ans_area ul').append(fuga);
+        });
+    }
+    
+    //結果を表示する関数
+    function quizResult(){
+        quizArea.find('.quiz_set').hide();
+        var text = quiz_fin_cnt + '問中' + quiz_success_cnt + '問正解！'; 
+        if(quiz_fin_cnt === quiz_success_cnt){
+            text += '<br>全問正解おめでとう！';
+        }
+        text += "<br><button class='quiz_restart p-10'>もう一度挑戦する</button> ";
+        quizArea.find('.quiz_result').html(text);
+        quizArea.find('.quiz_result').show();
+        quizArea.find('.twitter').show();
+        quizArea.find('.wordpress').show();
+    }
+    
+    //配列をシャッフルする関数
+    function arrShuffle(arr){
+        for(i = arr.length - 1; i > 0; i--){
+            var j = Math.floor(Math.random() * (i + 1));
+            var tmp = arr[i];
+            arr[i] = arr[j];
+            arr[j] = tmp;
+        }
+        return arr;
+    }
+});
+    
+
+</script>
+
+
+</head>
+
+<body>
+
+<div class="quiz_area">
+    <div class="quiz_set">
+             第<span class="quiz_no">0</span>問
+        <div class="quiz_question"></div>
+        <div class="quiz_ans_area">
+            <ul>
+            </ul>
+        </div>
+        <div class="quiz_area_bg"></div>
+        <div class="quiz_area_icon"></div>
+        </div>
+        
+    <div class="quiz_result"> </div>     
+    <div class = "twitter"><a class="share_tw" href="" target="_blank" rel="nofollow noopener">Twitterで呟こう！！</a>
+    <a class="wordpress" href="https://baseball-record-stadium.com" target="_blank" rel="noopener noreferrer">本サイトもよろしく！！</a>
+    </div> 
+       
+</div>
+
+</body>
+
